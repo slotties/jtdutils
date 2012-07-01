@@ -1,0 +1,26 @@
+\subsection{tdlocks}
+
+With tdls you can get an overview of all threads, but what now?
+Another tool is tdlocks.
+It displays all locks and a couple of information you may need.
+The output has this format:
+\begin{lstlisting}
+Lock: [lock_obj_addr] ([lock_obj_class])
+Owners: n
+        [thread_name]
+        ...
+Waiting threads: n
+        [thread_name]
+        ...
+\end{lstlisting}
+
+Each lock information block contains the object address of the locking object and its class.
+These information allow you to see what kind of object is used to lock and, if you have a heap dump at the very same time the thread dump was taken, you may check the object by using its address.
+Additionaly each block has one section for the lock owner and one for those threads that wait for the lock.
+Sometimes no owner is displayed.
+In this case no \inlineCode{synchronized}-block is used, but \inlineCode{Object.wait()}.
+When no object is currently running and all are waiting for a thread to call \inlineCode{Object.notify()} you won't see any owner.
+
+In a dump can be very many locks.
+To handle this you can specify the \inlineCode{-w} parameter so tdlocks just displays locks having at least n waiting threads.
+You can also use \inlineCode{-c} to specify the lock object class, if you search for specific locks.

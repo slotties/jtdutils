@@ -1,0 +1,18 @@
+\subsection{tdprobe}
+
+The idea behind tdprobe is to automatise the analysation standard problems.
+You have to be able to easily write atomar problem tests and receive a report of their results, just like a unit test runner.
+For example there may be a script which checks if an average number of threads exist.
+If the number of existing threads is much higher than the common number, this indicates a problem.
+Another test would check for the highest amount of threads waiting for a lock.
+If the number is way too high, this indicates another problem.
+Of course the second test just needs to run if the first test found a problem.
+Such tests may be configured and even have a history which influences the configuration.
+The first test could have a configured average amount of 500 threads but history shows that an average of 510 threads were found.
+This means again that tdprobe may not just be called with dumps of problems, but also with dumps of fine running systems.
+
+As you see tdprobe is just a neural network.
+Currently the implementation doesn't support history, but at least configuration.
+Also no dependencies are implemented.
+Always all tests are executed.
+The tests are implemented in LUA\footnote{http://www.lua.org/}.

@@ -1,0 +1,33 @@
+.TH TDSTAT 1 ??? "jtdutils 0.6"
+.SH NAME
+tdstat - display statitics about thread states of dumps in the tdstrip-format
+.SH SYNOPSIS
+.B tdstat
+.RI [-f\ FILTER\ ..\ |\ -h\ |\ -v]
+.RI [FILE]
+.SH DESCRIPTION
+tdstat displays a table while each dump has one line that displays the number of threads per thread state.
+Optionally you may specify so called filters similar to tdgrep filters. Each filter will have one line per dump and just counts the threads that match the filter.
+Therefore each filter can just select a subset of threads and does not provide some accomulation over multiple dumps.
+You may specify as many filters as you wish to.
+.br
+If FILE is given it has to point to a plain text file containing thread dumps. All text that cannot be recognized to be part of a thread dump will be ignored.
+.br
+FILE may be omitted when redirecting the the text via standard input to this tool.
+.SH OPTIONS
+.SS General programm options
+.TP 10
+-h, --help
+Print the very small help.
+.TP
+-v, --version
+Print version information.
+.SS Specifying a filter
+.TP 10
+-f FILTER, --filter FILTER
+A FILTER has the syntax VALUE,METHOD. VALUE is the value to match and METHOD is one of: s(tarts with), e(xact), c(ontains), r(egular expression).
+Currently the filter just applies on the thread name and no other field is configurable.
+.SH SEE ALSO
+tdstrip, tdgrep, tdfilter, tdlocks, tdstat, tdls
+.SH AUTHOR
+Stefan Lotties, <slotties@gmail.com>

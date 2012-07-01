@@ -1,0 +1,59 @@
+.TH TDGREP 1 ??? "jtdutils 0.6"
+.SH NAME
+tdgrep - a tool for filtering single threads from the tdstrip-format
+.SH SYNOPSIS
+.B tdfilter
+.RI [FIELD]
+.RI [METHOD]
+.RI [-w\ NUMBER]
+.RI [OPTION]
+.RI PATTERN
+.RI [FILE]
+.SH DESCRIPTION
+tdgrep is a filtering tool like tdfilter, except it's thread-based and not dump-based.
+.br
+If FILE is given it has to point to a plain text file containing thread dumps. All text that cannot be recognized to be part of a thread dump will be ignored.
+.br
+FILE may be omitted when redirecting the the text via standard input to this tool.
+.br
+By filtering threads you select a thread field (FIELD) and a filtering method (METHOD) which is applied on each thread in each provided dump.
+.SH OPTIONS
+.SS General programm options
+.TP 10
+-h, --help
+Print the very small help.
+.TP
+-v, --version
+Print version information.
+.TP
+-m NUMBER, --min-occurences NUMBER
+Keep all threads that match the given filtering settings but at least occure NUMBER times over all dumps. The NUMBER may either be an absolute number (>0) or a relative one (0 < NUMBER < 1) representing a procentual amount over all dumps (e.g. 0.8 for 80% of all dumps). 
+.SS Fields
+.TP 10
+-n, --name
+Use the thread name.
+.TP
+-t, --stacktrace
+Use any stacktrace element (code line). This is the default filtering field.
+.TP
+-j, --java-pid
+Use the jvm internal thread ID.
+-p, --pid
+Use the real thread ID.
+.SS Filtering methods
+.TP 10
+-s, --starts-with
+Matches if the field starts with the pattern.
+.TP
+-c, --contains
+Matches if the field contains the pattern. This is the default method.
+.TP
+-e, --exact
+Matches if the field is exactly the same as the pattern.
+.TP
+-r, --regular-expression
+Matches if the field matches the pattern, which itself is a regular expression.
+.SH SEE ALSO
+tdstrip, tdgrep, tdfilter, tdlocks, tdstat, tdls
+.SH AUTHOR
+Stefan Lotties, <slotties@gmail.com>

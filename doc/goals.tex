@@ -1,0 +1,37 @@
+\section{Preface}
+
+\subsection{My work}
+
+I'm working at Imperia AG\footnote{http://www.imperia-ag.com} since August 2003.
+I began as a trainee in software development and succeeded after 2 1/2 years.
+I'm in the product development of our content management system.
+Until about 2005 most of my work was just programming new features and fixing my bugs.
+Then two other ex-trainee's and myself were selected to do third level support additionally to our usual work.
+So I got more and more into analysis of problems and therefore also JVM specific analytic methods, like thread and heap dumps.
+At the moment I'm mostly writing frontend code and analysing problems, so I need something to work at which doesn't have anything to do with frontend ;)
+
+\subsection{My problems}
+
+An ex-co-worker, Ingo Rockel\footnote{http://www.grimmfrost.de}, did much analytic stuff too.
+He wrote a tool called thread dump analyzer (TDA)\footnote{https://tda.dev.java.net/}.
+The tool is graphical oriented and helped me a lot to analyze thread dumps.
+But after looking at thread dumps for over three years now I found out that many common things repeat.
+In application server environments, like ours, you just need to look at a couple of thread types, like request threads to quickly see what the problem was, if it's a problem that can be analysed by thread dumps.
+Also things like hanging jdbc connections may be common.
+So I wanted to reduce the time I need to check these common problems.
+A frontend tool isn't very suitable for this type of work, so the answer must be a command line tool which can be used through scripts.
+
+\subsection{My solution}
+
+To achieve this automatism I began writing the jtdutils.
+A set of atomar tools which can be combined very flexible to enable powerful scripts.
+
+\subsection{My intentions}
+
+When I thought about this project I had to decide which language to take.
+I'm doing java over six years now. 
+So this is no option.
+A script language?
+Maybe...
+C/C++?
+Sounds good, but C or C++? Hm. This took me quite some time, but in the end I decided for C because I don't like the style of C++.

@@ -1,0 +1,45 @@
+\section{Build}
+
+\subsection{Preparation}
+To build the jtdutils you need to check it out:
+\begin{lstlisting}
+svn co https://jtdutils.svn.sourceforge.net/svnroot/jtdutils/trunk
+\end{lstlisting}
+
+Currently the structure is as followed:
+\begin{description}
+\item[doc] contains documentation, like this here.
+\item[test] contains unit tests.
+\item[tools] contains extra stuff, like ZSH completion functions.
+\end{description}
+
+Each component or tool of the jtdutils suite has its own directory.
+
+\subsection{Tools}
+
+To build the tools you may switch to the top level directory (\fileName{jtdutils/trunk})
+and invoke
+\begin{lstlisting}
+make
+\end{lstlisting}
+
+done! 
+There are a couple of more targets:
+\begin{description}
+\item[man] gzip's and installs man-pages.
+\item[libtd] builds the libtd lib.
+\item[unit\_tests] invokes the unit tests.
+\item[zshcomp] installs the ZSH components.
+\item[dist-src] creates the source distribution GZIP.
+\item[dist-bin] creates the binary distribution GZIP.
+\item[arch] creates an ARCH Linux package.
+\end{description}
+
+Each tool has its own target, so it can be build independent.
+
+\subsection{Documentation}
+
+The documentation has its own makefile currently. 
+Just cd into \fileName{doc/} and invoke make. 
+Currently the only other target, which is automatically called by the all-target, is pdf.
+The documentation build requires \fileName{pdflatex} to build.

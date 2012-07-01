@@ -1,0 +1,94 @@
+\subsection{Hangings HTTP-Requests in Application Servers}
+
+\subsubsection{The Problem}
+
+The support, or an administrator, comes to you saying ``The server does not answer requests currently, dunno why! It worked a few hours ago!''.
+Usually you have three options here:
+\begin{enumerate}
+\item Check the client <-> server communication on package drops or high latency.
+\item Take a couple of thread dumps while sending requests to the server.
+\item ``Get the fuck off, it's friday and I go home now!''
+\end{enumerate}
+
+Option three may be the quickest one to solve the problem, at least for you.
+But problems usually come back at you even faster than a plate after telling your girlfriend she might became thicker lately.
+So this option should be avoided, even though thinking of it might be fun.
+\\\\
+We've chosen to analyse this problem.
+\\\\
+In case of not knowing the system or environment option one would be my preferred.
+After checking the communication the problem is either better isolated or, if not, option two is the next.
+
+Only left now is option two. 
+We send an http request to the server to see if the problem still exists, which happens to be so.
+After waiting for two minutes we can say the server does not answer at all and is not just slow.
+Let's take a look on the machine's load and we see it's getting pretty high without coming back down.
+After ensuring it's the java process(es) of the application server, we check take a couple of thread dumps whith a pause of 30 to 60 seconds between.
+
+\subsubsection{The analysation}
+
+Now the real fun begins!
+\\\\
+What do we know now?
+We know the load is high and http requests seem to hang.
+The problem is already pretty isolated.
+Using tdstrip and tdgrep we just want to get http request threads.
+In oracle application servers these are threads having "AJPRequestHandler-[...]" as thread name.
+In jboss they're named "http-[...]".
+
+Now we extract just request threads:
+\begin{verbatim}
+tdstrip my.log | tdgrep AJP -t > req_threads
+\end{verbatim}
+
+The req\_threads file now just contains http requests threads.
+The next step is to see if there are any locks shared by all these threads:
+\begin{verbatim}
+tdlocks req_threads
+\end{verbatim}
+
+We were lucky!
+Almost all threads are blocked by the connection pool.
+What's next?
+We have to see why the connection pool is blocking.
+Obviously because all connections are in use.
+But why?
+We should take a look at the stacktrace of the thread(s) that have a connection blocked currently.
+We were lucky again!
+All threads hang in the same code fragments that need to select data from the database.
+
+We should take a couple of more thread dumps and check if the connections are free'd or if these threads use them ``forever''.
+After a few minutes we see the connections being free'd and other threads getting their connections.
+That means we have either a problem with the select itself or with the database connection.
+
+Using a tool like squirrel\footnote{http://squirrel-sql.sourceforge.net/} we did some sql SELECT's and proved the database is not slow.
+Now we execute the same SELECT as the code fragment does and we notice the SELECT is executed very slow.
+Oh no!
+The execution plan of this select includes a full table scan!
+
+\subsubsection{The solution}
+
+What have we analyzed so far?
+We know http-requests are executed very slow as the connection pool blocks because the database executes our SELECT very slow because it decides to use full table scans.
+
+Once again we may decide how to go on:
+\begin{enumerate}
+\item We set up one (or more) indices so the SELECT is executed faster.
+\item We use caches to reduce the database access to a minimum, at least for this SELECT.
+\item We optimize the SELECT.
+\end{enumerate}
+
+As the SELECT was very simple it's not possible to optimize it any further.
+The table structure is also fine.
+So option three cannot be applied.
+
+The perfect option left is the hidden number four: a combination of one and two.
+Big companies usually don't like to get their problems hotfixed by updating applications that need a redeployment or even a restart of the application server because of the down time.
+That's why we decide for option one at first.
+Option two will be implemented soon and, as soon as the customer has planned a maintenance window, he can install the new version of our application.
+\\\\
+This example is fine for presenting how software analyzation works.
+Instead of having many persons having specialized knowledge on single tasks like a network engineer or a database administrator it's much more efficient to concentrate a large knowledge in single persons.
+This allows single persons to handle complex problems when specialized persons usually say ``That's not part of my knowledge, sorry.''.
+It's always fine to rely on specialized people when having very special questions like internal techniques of a database, if you really need to know that.
+As long as you have the overview of all things that might influence the system you'll surely find the cause and fix it.

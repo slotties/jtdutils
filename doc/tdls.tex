@@ -1,0 +1,44 @@
+\subsection{tdls}
+
+To get a list of all threads of a tdstrip output the tool tdls helps you just like ls does.
+For example you have a couple of dumps with plenty of threads.
+Using tdls it will look like this:
+\begin{lstlisting}
+[dump_id]
+Total threads: n
+    [native_pid] [state] [thread_name]
+    ...
+    
+[dump_id]
+Total threads: n
+    [native_pid] [state] [thread_name]
+    ...    
+\end{lstlisting}
+
+If you need the java PID, you have to specify the \inlineCode{-j} parameter.
+Process ID's are displayed in decimal per default.
+If you need their original hexadecimal value, specify the \inlineCode{-H} parameter.
+
+The state is just a one-letter presentation of the state name, which maps as followed:
+
+\begin{tabular}{r | l}
+R & Running \\ \hline
+O & Object.wait() \\ \hline
+C & Waiting on condition \\ \hline
+M & Waiting for monitor \\ \hline
+S & Sleeping \\ \hline
+U & Unknown
+\end{tabular}
+
+There are also some parameters to specify the ordering:
+
+\begin{description}
+\item[-j] Sort by java PID.
+\item[-p] Sort by native PID.
+\item[-n] Sort by name (\textbf{default}).
+\end{description}
+
+Just like ls you may pass \inlineCode{-r} to display all threads in reversed order.
+The dumps are still in their natural order.
+
+As you see tdls enables you to get a brief overview of what threads are inside the dumps and in which states they are.

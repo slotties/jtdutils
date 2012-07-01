@@ -1,0 +1,28 @@
+.TH TDSTRIP 1 ??? "jtdutils 0.6"
+.SH NAME
+tdstrip - a tool for translating Java thread dumps into XML
+.SH SYNOPSIS
+.B tdstrip 
+.RI [OPTION]
+.RI [FILE]
+.SH DESCRIPTION
+tdstrip read Java thread dumps and translates them into XML. This mechanism enables tools independent to deal with thread dumps independent on the JVM (SUN, IBM, ...).
+.br
+If FILE is given it has to point to a plain text file containing thread dumps. All text that cannot be recognized to be part of a thread dump will be ignored.
+.br
+Instead of providing a FILE you may also pipe the text to tdstrip.
+.SH OPTIONS
+.SS General programm options
+.TP 10
+-h, --help
+Print the very small help.
+.TP
+-v, --version
+Print version information.
+.TP
+-t type, --type type
+Uses the given parser type for parsing the log file. The type can either be ibm or sun. The default is sun.
+.SH SEE ALSO
+tdstrip, tdgrep, tdfilter, tdlocks, tdstat, tdls
+.SH AUTHOR
+Stefan Lotties, <slotties@gmail.com>

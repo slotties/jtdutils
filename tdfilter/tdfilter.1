@@ -1,0 +1,39 @@
+.TH TDFILTER 1 ??? "jtdutils 0.6"
+.SH NAME
+tdfilter - a tool for filtering Java thread dumps in the tdstrip-format
+.SH SYNOPSIS
+.B tdfilter
+.RI [-x\ FROM[-TO]\ |\ -i\ FROM[--TO]]
+.RI [FILE]
+.SH DESCRIPTION
+tdfilter reads Java thread dumps in the JVM independent format of tdstrip.
+.br
+If FILE is given it has to point to a plain text file containing thread dumps. All text that cannot be recognized to be part of a thread dump will be ignored.
+.br
+FILE may be omitted when redirecting the the text via standard input to this tool.
+.SH OPTIONS
+.SS General programm options
+.TP 10
+-h, --help
+Print the very small help.
+.TP
+-v, --version
+Print version information.
+.SS Filtering options
+Multiple filtering options can be specified in order. 
+For example all dumps from index 0-5 and 6-7 could be selected in order
+to filter out index 5.
+.TP 10
+-x FROM[-TO], --index FROM[-TO]
+Keep all thread dumps having an index between FROM and optionally TO. 
+If TO is left out just the single selected index will be kept. 
+The lowest selectable index is 0. 
+The TO index is not included in the output.
+.TP
+-i FROM[--TO], --id FROM[--TO]
+Keep all thread dumps beginning at ID FROM including TO.
+Note that, in difference to the -x parameter, -i uses a double minus (--) instead of a single minus to separate FROM and TO.
+.SH SEE ALSO
+tdstrip, tdgrep, tdfilter, tdlocks, tdstat, tdls
+.SH AUTHOR
+Stefan Lotties, <slotties@gmail.com>

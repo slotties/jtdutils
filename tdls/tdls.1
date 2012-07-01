@@ -1,0 +1,51 @@
+.TH TDLS 1 ??? "jtdutils 0.6"
+.SH NAME
+tdls - display lists of all threads in dumps of the tdstrip-format
+.SH SYNOPSIS
+.B tdls
+.RI [-P|-N|-S]\ [-j]\ [-Hr]\ [FILE]
+.SH DESCRIPTION
+tdls is ls for thread dumps. It displays lists of all threads in all dumps, while each dump may be seen as directory.
+Each thread will be shown with its native thread ID, its state and its name.
+.br
+If FILE is given it has to point to a plain text file containing thread dumps. All text that cannot be recognized to be part of a thread dump will be ignored.
+.br
+FILE may be omitted when redirecting the the text via standard input to this tool.
+.SH OPTIONS
+.SS General programm options
+.TP 10
+-h, --help
+Print the very small help.
+.TP
+-v, --version
+Print version information.
+.SS Sorting options
+.TP 10
+-r, --reverse
+Reversed sorting. Default ordering is ascending.
+.TP
+-H, --hex-pids
+Display all PID's in hexadecimal rather than decimal.
+.TP
+-P, --sort-pid
+Sort by native PID.
+.TP
+-J, --sort-jpid
+Sort by java PID.
+.TP
+-N, --sort-name
+Sort by thread name.
+.TP
+-S, --sort-state
+Sort by thread state.
+.SS Field selectors
+Per default each the native thread ID, the thread state and its name
+will be displayed. Additionally you can display more fields using the
+following parameters.
+.TP 10
+-j, --java-pid
+Display the java PID.
+.SH SEE ALSO
+tdstrip, tdgrep, tdfilter, tdlocks, tdstat, tdls
+.SH AUTHOR
+Stefan Lotties, <slotties@gmail.com>

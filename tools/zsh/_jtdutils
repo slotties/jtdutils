@@ -1,0 +1,65 @@
+#compdef tdstrip tdls tdstat tdlocks tdgrep tdfilter
+
+# Common arguments
+arguments=(
+	'(-h --help)'{-h,--help}'[Prints the help.]'
+	'(-v --version)'{-v,--version}'[ Prints the version information.]'
+)
+
+# Tool dispatcher
+case "$service" in
+tdls)
+	arguments+=(
+		'(-H --hex-pids)'{-H,--hex-pids}'[Print all thread IDs in hexadecimal rather than decimal format.]'
+		'(-r --reverse)'{-r,--reverse}'[Reverses the sort order.]'
+		
+		'(-S --sort-state -N --sort-name -J --sort-jpid)'{-P,--sort-pid}'[Sorts by native PID.]'
+		'(-P --sort-pid -S --sort-state -N --sort-name)'{-J,--sort-jpid}'[Sorts by java PID.]'
+		'(-P --sort-pid -N --sort-name -J --sort-jpid)'{-S,--sort-state}'[Sorts by thread state.]'
+		'(-P --sort-pid -S --sort-state -J --sort-jpid)'{-N,--sort-name}'[Sorts by thread name.]'
+		
+		'(-j --java-pid)'{-j,--java-pid}'[Display the java PID.]'
+	)
+;;
+tdstat)
+	arguments+=(
+		'(-f --filter)'{-f,--filter}'[Filter in format "value,method"]:<value,method (method=s,c,e,r)>'
+	)
+;;
+tdlocks)
+	arguments+=(
+		'(-w --minimum-waiting)'{-w,--minimum-waiting}'[Minimum waiting threads]:<Number>'
+		'(-c --lock-class)'{-c,--lock-class}'[Class of the lock object]:<Full qualified class name>'
+	)
+;;
+tdgrep)
+	arguments+=(
+		'(-m --min-occurences)'{-m,--min-occurences}'[A filtered thread has to occur in at least NUMBER dumps.]:<Amount>'
+		
+		'(-p --pid -j --java-pid -n --name -t --stacktrace)'{-p,--pid}'[Filter by native PID.]:<PID>'
+		'(-p --pid -j --java-pid -n --name -t --stacktrace)'{-j,--java-pid}'[Filter by java PID.]:<PID>'
+		'(-p --pid -j --java-pid -n --name -t --stacktrace)'{-n,--name}'[Filter by thread name.]:<Name>'
+		'(-p --pid -j --java-pid -n --name -t --stacktrace)'{-t,--stacktrace}'[Filter by occurence in stacktrace.]:<Code>'
+		
+		'(-s --starts-with -c --contains -e --exact -r --regular-expression)'{-s,--starts-with}'[The field has to start with the expression.]'
+		'(-s --starts-with -c --contains -e --exact -r --regular-expression)'{-c,--contains}'[The field has to contain the expression.]'
+		'(-s --starts-with -c --contains -e --exact -r --regular-expression)'{-e,--exact}'[The field has to be exactly the expression.]'
+		'(-s --starts-with -c --contains -e --exact -r --regular-expression)'{-r,--regular-expression}'[The field has to match the regular expression.]'
+		
+		'1:Expression:_guard "^-*" Expression'
+    )
+;;
+tdfilter)
+	arguments+=(
+		'(-x --index -i --id)'{-x,--index}'[Filter by dump index in dump]:<FROM_IDX-TO_IDX (TO_IDX is optional)>'
+		'(-x --index -i --id)'{-i,--id}'[Filter by dump id in dump]:<FROM_ID--TO_ID (TO_ID is optional)>'
+	)
+;;
+
+esac
+
+# Each tool accepts input files.
+arguments+=('(1)*:Input file:_files')
+  
+
+_arguments -s $arguments
