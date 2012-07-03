@@ -55,6 +55,8 @@ typedef struct {
 	bool isLockOwner;
 } td_line;
 
+#define TD_FILE_NATIVE "NATIVE"
+
 typedef struct {
 	char* value;
 	regex_t* regexp;
@@ -79,6 +81,8 @@ void td_free_dump(td_dump* dump);
 
 td_state str2state(const char* buffer);
 const char* state2str(td_state state);
+
+bool td_isnative(const td_line* line);
 
 // Filtering functions
 bool td_tfcmp(const char* value, const td_tfval* tfv);

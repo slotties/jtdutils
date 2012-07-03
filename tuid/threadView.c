@@ -68,6 +68,8 @@ static inline void updateStackView(td_thread* thread, GtkWidget* stackView) {
 	g_string_append(str, thread->name);
 	g_string_append(str, "\n");
 	
+	char tmp_lineBuffer[32]; // buffer for converting line-number into a string
+	
 	list* stack = thread->stacktrace;
 	while (stack) {
 		td_line* line = stack->data;
@@ -79,14 +81,13 @@ static inline void updateStackView(td_thread* thread, GtkWidget* stackView) {
 			}
 			
 			g_string_append(str, " (");
-			if (line->line > 0) {
+			if (td_isnative(line)) {
+				g_string_append(str, "Native");
+			} else {
 				g_string_append(str, line->file);
 				g_string_append(str, ":");
-				char tmp[32];
-				snprintf(tmp, 32, "%d", line->line);
-				g_string_append(str, tmp);
-			} else {
-				g_string_append(str, "Native");
+				snprintf(tmp_lineBuffer, 32, "%d", line->line);
+				g_string_append(str, tmp_lineBuffer);
 			}
 			g_string_append(str, ")\n");
 		}

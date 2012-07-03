@@ -171,3 +171,7 @@ bool strstarts(const char* buffer, const char* target) {
 	
 	return true;
 }
+
+bool td_isnative(const td_line* line) {
+	return line && strcmp(line->file, TD_FILE_NATIVE) == 0;
+}

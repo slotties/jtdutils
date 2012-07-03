@@ -145,7 +145,7 @@ static void handle_stacktrace_elemenet(td_line_type type, const char** attribute
 		return;
 	}
 	
-	unsigned int line = -1;
+	unsigned int line = 0;
 	const char* class = NULL;
 	const char* file = NULL;
 	const char* lockObjId = NULL;
@@ -189,7 +189,15 @@ static void handle_stacktrace_elemenet(td_line_type type, const char** attribute
 		t_line->type = type;
 		t_line->line = line;
 		t_line->class = class ? strdup(class) : NULL;
-		t_line->file = file ? strdup(file) : NULL;
+		if (file) {
+			if (strcmp(file, TD_FILE_NATIVE) == 0) {
+				t_line->file = TD_FILE_NATIVE;
+			} else {
+				t_line->file = strdup(file);
+			}
+		} else {
+			t_line->file = NULL;
+		}
 		t_line->lockObjId = lockObjId ? strdup(lockObjId) : NULL;
 		t_line->isLockOwner = isLockOwner;
 		

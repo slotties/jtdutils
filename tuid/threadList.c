@@ -58,7 +58,7 @@ void updateThreadList(GtkWidget* threadList, td_dump* dump) {
 	while (threads) {
 		td_thread* thread = threads->data;
 		gtk_list_store_append(store, &i);
-		gtk_list_store_set(store, &i, COL_NAME, thread->name, COL_PID, thread->native_id, -1);
+		gtk_list_store_set(store, &i, COL_NAME, thread->name, COL_PID, thread->native_id, COL_STATE, state2str(thread->state), -1);
 		
 		threads = threads->next;
 	}
