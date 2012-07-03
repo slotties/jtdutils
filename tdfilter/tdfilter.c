@@ -45,7 +45,7 @@ typedef struct {
 
 static void print_filtered(FILE* in, filter_state* state);
 static bool update_range_knowledge(filter_state* state, const char* dump_id, d_filter* filter);
-static bool add_idx_filter(filter_state* state, const char* value);
+static bool add_idx_filter(filter_state* state, char* value);
 static bool add_id_filter(filter_state* state, const char* value);
 static void free_d_filter(d_filter* filter);
 static void print_help();
@@ -141,7 +141,7 @@ static void free_d_filter(d_filter* filter) {
 	free(filter);
 }
 
-static bool add_idx_filter(filter_state* state, const char* value) {
+static bool add_idx_filter(filter_state* state, char* value) {
 	const char* range_delim = "-";
 
 	d_filter* filter = (d_filter*) malloc(sizeof(d_filter));
@@ -254,7 +254,9 @@ static bool update_range_knowledge(filter_state* state, const char* dump_id, d_f
 	return inside_range;
 }
 
-static v_result filter_dump(filter_state* state, const char* id) {
+static v_result filter_dump(void* stateObj, const char* id) {
+	filter_state* state = (filter_state*) stateObj;
+	
 	bool accepted = false;
 	
 	list* filters = state->filters;
@@ -292,7 +294,7 @@ static v_result filter_dump(filter_state* state, const char* id) {
 	}
 }
 
-static v_result copy_dump_end(void* userdata, const td_dump* dump, v_result inResult) {
+static v_result copy_dump_end(void* userdata, td_dump* dump, v_result inResult) {
 	if ((inResult & V_SKIP) == 0) {
 		td_print_dumpend();
 	}
