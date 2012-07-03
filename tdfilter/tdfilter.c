@@ -47,7 +47,7 @@ static void print_filtered(FILE* in, filter_state* state);
 static bool update_range_knowledge(filter_state* state, const char* dump_id, d_filter* filter);
 static bool add_idx_filter(filter_state* state, char* value);
 static bool add_id_filter(filter_state* state, const char* value);
-static void free_d_filter(d_filter* filter);
+static void free_d_filter(void* filter);
 static void print_help();
 
 int main(int argc, char** argv) {
@@ -131,7 +131,8 @@ Filtering options:\n\
 ");
 }
 
-static void free_d_filter(d_filter* filter) {
+static void free_d_filter(void* filterObj) {
+	d_filter* filter = (d_filter*) filterObj;
 	if (filter->from_id) {
 		free(filter->from_id);
 	}

@@ -48,7 +48,7 @@ typedef struct {
 static void printd_filtered(FILE* in, grep_state* state);
 static void print_help();
 static bool t_cnt_equals(const void* t, const void* target);
-static void free_t_cnt(struct t_cnt* counter);
+static void free_t_cnt(void* counter);
 
 int main(int argc, char** argv) {
 	int idx;
@@ -256,8 +256,10 @@ static void add_thread_count(grep_state* state, const char* id) {
 	}
 }
 
-static v_result filter_by_attribute(grep_state* gstate, const char* name, const char* native_id, const char* java_id, 
+static v_result filter_by_attribute(void* gstatep, const char* name, const char* native_id, const char* java_id, 
 	td_state state) {
+
+	grep_state* gstate = (grep_state*) gstatep;
 
 	const char* val = NULL;
 	switch (gstate->filter.field) {
@@ -293,7 +295,9 @@ static v_result filter_by_attribute(grep_state* gstate, const char* name, const 
 	return r;
 }
 
-static v_result copy_lock(grep_state* state, const char* class, const char* lockObjId, bool isLockOwner) {
+static v_result copy_lock(void* statep, const char* class, const char* lockObjId, bool isLockOwner) {
+	grep_state* state = (grep_state*) statep;
+	
 	if (state->filter.field == STACKTRACE || state->filter_by_occ) {
 		return V_BASE | V_KEEP;
 	} else {
@@ -301,7 +305,9 @@ static v_result copy_lock(grep_state* state, const char* class, const char* lock
 		return V_BASE;
 	}
 }
-static v_result copy_code(grep_state* state, const char* file, const char* class, unsigned int line) {
+static v_result copy_code(void* statep, const char* file, const char* class, unsigned int line) {
+	grep_state* state = (grep_state*) statep;
+	
 	if (state->filter.field == STACKTRACE || state->filter_by_occ) {
 		return V_BASE | V_KEEP;
 	} else {
@@ -309,7 +315,9 @@ static v_result copy_code(grep_state* state, const char* file, const char* class
 		return V_BASE;
 	}	
 }
-static v_result copy_constructor(grep_state* state, const char* file, const char* class, unsigned int line) {
+static v_result copy_constructor(void* statep, const char* file, const char* class, unsigned int line) {
+	grep_state* state = (grep_state*) statep;
+	
 	if (state->filter.field == STACKTRACE || state->filter_by_occ) {
 		return V_BASE | V_KEEP;
 	} else {
@@ -318,8 +326,11 @@ static v_result copy_constructor(grep_state* state, const char* file, const char
 	}
 }
 
-static v_result filter_by_object(grep_state* state, td_thread* thread, v_result inResult) {
+static v_result filter_by_object(void* statep, td_thread* thread, v_result inResult) {
 	v_result r = V_BASE;
+	
+	grep_state* state = (grep_state*) statep;
+	
 	if (state->filter.field == STACKTRACE) {
 		// late accepting
 		if (td_filtermatches(thread, &(state->filter))) {
@@ -348,8 +359,8 @@ static v_result filter_by_object(grep_state* state, td_thread* thread, v_result 
 	return r;
 }
 
-v_result copy_dump_start(grep_state* state, const char* id) {
-	if (!state->filter_by_occ) {
+v_result copy_dump_start(void* state, const char* id) {
+	if (!((grep_state*) state)->filter_by_occ) {
 		td_print_dumpstart(id);
 		return V_BASE;
 	} else {
@@ -357,8 +368,8 @@ v_result copy_dump_start(grep_state* state, const char* id) {
 	}
 }
 
-v_result copy_dump_end(grep_state* state, td_dump* dump, v_result in) {
-	if (!state->filter_by_occ) {
+v_result copy_dump_end(void* state, td_dump* dump, v_result in) {
+	if (!((grep_state*) state)->filter_by_occ) {
 		td_print_dumpend();
 		return V_BASE;
 	} else {
@@ -394,7 +405,9 @@ void printd_filtered(FILE* in, grep_state* state) {
 	td_free_parser(parser);
 }
 
-static void free_t_cnt(struct t_cnt* counter) {
+static void free_t_cnt(void* counterp) {
+	struct t_cnt* counter = (struct t_cnt*) counterp;
+	
 	free(counter->id);
 	free(counter);
 }
