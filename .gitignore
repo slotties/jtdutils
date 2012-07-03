@@ -1,1 +1,13 @@
 *.o
+*.a
+*.so
+
+tdlocks/tdlocks
+tdfilter/tdfilter
+tdgrep/tdgrep
+tdls/tdls
+tdpager/tdpager
+tdprobe/tdprobe
+tdstat/tdstat
+tdstrip/tdstrip
+tuid/tuid
