@@ -36,7 +36,7 @@ struct PagerFunction {
 
 static void print_help();
 static void page_threads(FILE* in, struct PagerFunction* fn);
-static bool compare_same_thread(void* data, void* );
+static bool compare_same_thread(const void* data, const void* );
 
 static void screen_init();
 static void screen_destroy();
@@ -62,7 +62,7 @@ static bool page_up();
 
 // state 
 list* DUMPS = NULL;
-list* CURRENtd_dump = NULL;
+list* CURRENT_DUMP = NULL;
 list* CURRENT_THREAD = NULL;
 
 int LEN_DUMPS = -1;
@@ -125,6 +125,7 @@ int main(int argc, char** argv) {
 		{ KEY_NPAGE, page_down },
 		
 		{ -1, NULL }
+		// TODO: help
 	};
 	
 	screen_init();
@@ -200,10 +201,10 @@ static bool quit() {
 
 static bool show_dump(list* dump_node) {
 	if (dump_node) {
-		CURRENtd_dump = dump_node;
+		CURRENT_DUMP = dump_node;
 		LEN_THREADS = -1;
 		
-		list* threads = ((td_dump*) CURRENtd_dump->data)->threads;
+		list* threads = ((td_dump*) CURRENT_DUMP->data)->threads;
 		list* thread = NULL;
 		if (STICKY_THREAD) {
 			thread = list_find_node(threads, compare_same_thread, STICKY_THREAD);
@@ -220,11 +221,11 @@ static bool show_dump(list* dump_node) {
 }
 
 static bool nextd_dump() {
-	return show_dump(CURRENtd_dump->next);
+	return show_dump(CURRENT_DUMP->next);
 }
 
 static bool prev_dump() {
-	return show_dump(list_get_pnode(DUMPS, CURRENtd_dump));
+	return show_dump(list_get_pnode(DUMPS, CURRENT_DUMP));
 }
 
 static bool show_thread(list* thread_node) {
@@ -236,7 +237,7 @@ static bool show_thread(list* thread_node) {
 		LEN_DUMPS = list_len(DUMPS);
 	}
 	if (LEN_THREADS < 0) {
-		LEN_THREADS = list_len(((td_dump*) CURRENtd_dump->data)->threads);
+		LEN_THREADS = list_len(((td_dump*) CURRENT_DUMP->data)->threads);
 	}
 	
 	CURRENT_THREAD = thread_node;
@@ -250,7 +251,7 @@ static void update_display() {
 	
 	// display thread information
 	td_thread* t = (td_thread*) CURRENT_THREAD->data;
-	td_dump* d = (td_dump*) CURRENtd_dump->data;
+	td_dump* d = (td_dump*) CURRENT_DUMP->data;
 	
 	char t_index[64];
 	sprintf(t_index, "(%d/%d)", 
@@ -258,7 +259,7 @@ static void update_display() {
 					
 	char d_index[64];
 	sprintf(d_index, "(%d/%d)", 
-		list_getidx(DUMPS, CURRENtd_dump) + 1, LEN_DUMPS);
+		list_getidx(DUMPS, CURRENT_DUMP) + 1, LEN_DUMPS);
 			
 	mvprintw(0, 0, "%-69s %10s", d->id, d_index);
 	mvprintw(1, 0, "%-69s %10s", t->name, t_index);
@@ -314,10 +315,10 @@ static bool next_thread() {
 }
 
 static bool prev_thread() {
-	return show_thread(list_get_pnode(((td_dump*) CURRENtd_dump->data)->threads, CURRENT_THREAD));
+	return show_thread(list_get_pnode(((td_dump*) CURRENT_DUMP->data)->threads, CURRENT_THREAD));
 }
 
-static bool compare_same_thread(void* data, void* sticky_thread) {
+static bool compare_same_thread(const void* data, const void* sticky_thread) {
 	char* current = ((td_thread*) sticky_thread)->native_id;
 	char* next = ((td_thread*) data)->native_id;
 	

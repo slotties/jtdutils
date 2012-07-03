@@ -44,8 +44,8 @@ typedef struct {
 	list* locks;
 } lock_filter;
 
-static v_result collect_locks(lock_filter* filter, td_thread* thread, v_result inResult);
-static void free_t_lock(t_lock* locks);
+static v_result collect_locks(void* filter, td_thread* thread, v_result inResult);
+static void free_t_lock(void* locks);
 static void td_print_locks(FILE* in, lock_filter* filter);
 static bool lock_matches(lock_filter* filter, t_lock* lock);
 static void print_help();
@@ -138,7 +138,8 @@ static v_result keep_dump(void* userdata, const char* id) {
 	return V_BASE | V_KEEP;
 }
 
-static v_result output_locks(lock_filter* filter, td_dump* dump, v_result inResult) {
+static v_result output_locks(void* filterp, td_dump* dump, v_result inResult) {
+	lock_filter* filter = (lock_filter*) filterp;
 	list* locks = filter->locks;
 
 	printf("Locks in dump %s\n", dump->id);
@@ -188,7 +189,7 @@ static v_result output_locks(lock_filter* filter, td_dump* dump, v_result inResu
 	return V_BASE;
 }
 
-static v_result keep_thread(const char* id, const char* native_id, const char* java_id, td_state state) {
+static v_result keep_thread(void* data, const char* id, const char* native_id, const char* java_id, td_state state) {
 	return V_BASE | V_KEEP;
 }
 
@@ -219,7 +220,8 @@ static bool lock_matches(lock_filter* filter, t_lock* lock) {
 	return true;
 }
 
-static v_result collect_locks(lock_filter* filter, td_thread* thread, v_result inResult) {
+static v_result collect_locks(void* filterp, td_thread* thread, v_result inResult) {
+	lock_filter* filter = (lock_filter*) filterp;
 	list* trace;
 	td_line* next;
 
@@ -273,7 +275,9 @@ static v_result collect_locks(lock_filter* filter, td_thread* thread, v_result i
 	return V_BASE;
 }
 
-static void free_t_lock(t_lock* lock) {
+static void free_t_lock(void* lockp) {
+	t_lock* lock = (t_lock*) lockp;
+	
 	free(lock->lock_id);
 	free(lock->lock_class);
 	list_free(lock->owner, free);
