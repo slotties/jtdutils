@@ -40,7 +40,9 @@ void td_free_tf(td_filter* filter) {
 }
 
 static void free_td_line(td_line* line) {
-	free(line->file);
+	if (line->file && !td_isnative(line))
+		free(line->file);
+		
 	free(line->class);	
 	free(line->lockObjId);
 	free(line);
