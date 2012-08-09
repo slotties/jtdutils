@@ -11,3 +11,5 @@ tdprobe/tdprobe
 tdstat/tdstat
 tdstrip/tdstrip
 tuid/tuid
+
+*.gz

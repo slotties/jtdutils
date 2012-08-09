@@ -189,11 +189,11 @@ FIELD is the field which is used for filtering:\n\
   -p, --pid         Native PID\n\
   -j, --java-pid    JVM internal PID\n\
   -n, --name        Thread name\n\
-  -t, --stacktrace  Any code line (either class or method) of the stacktrace.\n\
+  -t, --stacktrace  Any code line (either class or method) of the stacktrace. (default)\n\
 \n\
 METHOD is the method used for applying the filter:\n\
   -s, --starts-with                    The field has to start with the expression\n\
-  -c, --contains                       The field has to contain the expression\n\
+  -c, --contains                       The field has to contain the expression (default)\n\
   -e, --exact                          The field has to be exactly the expression\n\
   -r, --regular-expression             The field has to match the regular expression\n\
 ");
