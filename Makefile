@@ -1,6 +1,6 @@
 include Makefile.inc
 
-TOOLS=tdstrip tdgrep tdfilter tdstat tdlocks tdls tdpager tdprobe tuid
+TOOLS=tdstrip tdgrep tdfilter tdstat tdlocks tdls tdprobe tuid
 
 all: $(TOOLS)
 	
