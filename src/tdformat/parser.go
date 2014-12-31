@@ -8,20 +8,16 @@ import (
 )
 
 type Parser struct {
-	reader *bufio.Reader
+	scanner *bufio.Scanner
 	lastLine string
 }
 
 func NewParser(r io.Reader) Parser {
-	bufferedReader := bufio.NewReaderSize(r, 8 * 1024)
-	return Parser{ bufferedReader, "", }
+	scanner := bufio.NewScanner(r)
+	return Parser{ scanner, "", }
 }
 
 func (self *Parser) NextThread() (Thread, bool, error) {
-	var lineBytes []byte
-	var err error
-	err = nil
-
 	thread := Thread{}
 	// Check if a header line was cached on the last Next() call and parse it now.
 	if self.lastLine != "" {
@@ -29,9 +25,8 @@ func (self *Parser) NextThread() (Thread, bool, error) {
 		self.lastLine = ""
 	}
 
-	for err == nil {
-		lineBytes, _, err = self.reader.ReadLine()
-		line := string(lineBytes)
+	for self.scanner.Scan() {
+		line := self.scanner.Text()
 		if isThreadHeader(line) {
 			// A new dump started without forewarning (no new line between the dumps). We have to remember/cache
 			// this line in case Next() is called again. Otherwise we would forget this new dump.
