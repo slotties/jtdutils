@@ -17,7 +17,7 @@ func NewParser(r io.Reader) Parser {
 	return Parser{ bufferedReader, "", }
 }
 
-func (self *Parser) Next() (Thread, bool, error) {
+func (self *Parser) NextThread() (Thread, bool, error) {
 	var lineBytes []byte
 	var err error
 	err = nil
@@ -69,6 +69,10 @@ func isLock(line string) bool {
 	return strings.HasPrefix(line, "\t-")
 }
 
+func isDumpStart(line string) bool {
+	return strings.HasPrefix(line, "Full thread dump")
+}
+
 func parseThreadHeader(thread *Thread, line string) {
 	// Example: "D3D Screen Updater" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
 
@@ -111,4 +115,16 @@ func parseLockLine(thread *Thread, line string) {
 	lock.holds = strings.Contains(line, "locked <")
 	
 	thread.locks = append(thread.locks, lock)
+}
+
+func parseDumpHeader(headerLine string, prevLine string) ThreadDump {
+	/*
+	headerLine example: Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.65-b04 mixed mode):
+	prevLine example: 2014-12-31 11:01:49
+	*/
+
+	infoLine := stringBetween(headerLine, "dump ", ":")
+	id := prevLine
+
+	return ThreadDump{ infoLine, id }
 }

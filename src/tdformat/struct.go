@@ -4,6 +4,12 @@ package tdformat
 	Here are all structures regarding thread dump formats, such as dumps or stacktraces.
 */
 
+type ThreadDump struct {
+	// TODO: time
+	infoLine string
+	id string
+}
+
 type Thread struct {
 	name string
 	nid string
