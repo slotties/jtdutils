@@ -8,6 +8,7 @@ type ThreadDump struct {
 	// TODO: time
 	infoLine string
 	id string
+	// TODO: index?
 }
 
 type Thread struct {

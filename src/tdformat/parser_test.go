@@ -14,23 +14,68 @@ func TestNewParser(t *testing.T) {
 	assert.NotNil(t, parser)
 }
 
+func TestDumpSwitching(t *testing.T) {
+	reader := strings.NewReader(`
+"D3D Screen Updater" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
+"main1" prio=1 tid=0x10000000094ce800 nid=0xccc in Object.wait() [0x000000000ce3e000]
+
+2014-12-31 11:01:49
+Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.65-b04 mixed mode):
+"main2" prio=1 tid=0x10000000094ce800 nid=0xccc in Object.wait() [0x000000000ce3e000]
+
+2015-06-24 10:12:45
+Full thread dump foo bar:
+"foo" daemon prio=1 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
+`)
+	parser := NewParser(reader)
+	assert.NotNil(t, parser)
+
+	// First dump ("anonymous" => without a header line)
+	thread, reachedNewDump, err := parser.NextThread()
+	assert.True(t, reachedNewDump)
+	assert.Nil(t, err)
+	assert.Equal(t, "D3D Screen Updater", thread.name)
+	assert.Equal(t, "0", parser.Dump().id)
+	thread, reachedNewDump, err = parser.NextThread()
+	assert.False(t, reachedNewDump)
+	assert.Equal(t, "main1", thread.name)
+	assert.Equal(t, "0", parser.Dump().id)
+
+	// Second dump
+	thread, reachedNewDump, err = parser.NextThread()
+	assert.True(t, reachedNewDump)
+	assert.Nil(t, err)
+	assert.Equal(t, "main2", thread.name)
+	assert.Equal(t, "2014-12-31 11:01:49", parser.Dump().id)
+	assert.Equal(t, "Java HotSpot(TM) 64-Bit Server VM (24.65-b04 mixed mode)", parser.Dump().infoLine)
+
+	// Third dump
+	thread, reachedNewDump, err = parser.NextThread()
+	assert.True(t, reachedNewDump)
+	assert.Nil(t, err)
+	assert.Equal(t, "foo", thread.name)
+	assert.Equal(t, "2015-06-24 10:12:45", parser.Dump().id)
+	assert.Equal(t, "foo bar", parser.Dump().infoLine)
+}
+
 func TestNextThread_Single(t *testing.T) {
 	reader := strings.NewReader("\"D3D Screen Updater\" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]")
 	parser := NewParser(reader)
-
 	assert.NotNil(t, parser)
 
-	thread, threadFound, err := parser.NextThread()
+	thread, _, err := parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.Equal(t, true, threadFound)
-	// Expect an EOF because it was actually the end of the reader.
-	assert.Equal(t, io.EOF, err)
+	assert.Nil(t, err)
 
 	assert.Equal(t, "D3D Screen Updater", thread.name)
 	assert.Equal(t, "0xe2c", thread.nid)
 	assert.Equal(t, "0x00000000094ce800", thread.tid)
 	assert.Equal(t, true, thread.daemon)
 	assert.Equal(t, 8, thread.priority)
+
+	thread, _, err = parser.NextThread()
+	assert.NotNil(t, thread)
+	assert.Equal(t, io.EOF, err)
 }
 
 func TestNextThread_Multiple(t *testing.T) {
@@ -39,12 +84,10 @@ func TestNextThread_Multiple(t *testing.T) {
 "main" prio=1 tid=0x10000000094ce800 nid=0xccc in Object.wait() [0x000000000ce3e000]
 `)
 	parser := NewParser(reader)
-
 	assert.NotNil(t, parser)
 
-	thread, threadFound, err := parser.NextThread()
+	thread, _, err := parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.Equal(t, true, threadFound)
 	assert.Nil(t, err)
 	assert.Equal(t, "D3D Screen Updater", thread.name)
 	assert.Equal(t, "0xe2c", thread.nid)
@@ -52,19 +95,16 @@ func TestNextThread_Multiple(t *testing.T) {
 	assert.Equal(t, true, thread.daemon)
 	assert.Equal(t, 8, thread.priority)
 
-	thread, threadFound, err = parser.NextThread()
+	thread, _, err = parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.Equal(t, true, threadFound)
-	assert.Equal(t, io.EOF, err)
 	assert.Equal(t, "main", thread.name)
 	assert.Equal(t, "0xccc", thread.nid)
 	assert.Equal(t, "0x10000000094ce800", thread.tid)
 	assert.Equal(t, false, thread.daemon)
 	assert.Equal(t, 1, thread.priority)
 
-	thread, threadFound, err = parser.NextThread()
+	thread, _, err = parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.Equal(t, false, threadFound)
 	assert.Equal(t, io.EOF, err)
 }
 
@@ -82,9 +122,8 @@ func TestStacktrace(t *testing.T) {
 
 	assert.NotNil(t, parser)
 
-	thread, threadFound, _ := parser.NextThread()
+	thread, _, _ := parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.Equal(t, true, threadFound)
 	assert.NotNil(t, thread.stacktrace)
 	assert.Equal(t, 3, len(thread.stacktrace))
 
@@ -121,9 +160,8 @@ func TestLocks(t *testing.T) {
 
 	assert.NotNil(t, parser)
 
-	thread, found, _ := parser.NextThread()
+	thread, _, _ := parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.Equal(t, true, found)
 	assert.NotNil(t, thread.locks)
 	assert.Equal(t, 2, len(thread.locks))
 

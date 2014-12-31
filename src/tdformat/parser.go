@@ -10,13 +10,25 @@ import (
 type Parser struct {
 	scanner *bufio.Scanner
 	lastLine string
+	currentDump ThreadDump
+	nextDump ThreadDump
 }
 
 func NewParser(r io.Reader) Parser {
 	scanner := bufio.NewScanner(r)
-	return Parser{ scanner, "", }
+	return Parser{ 
+		scanner,
+		"",
+		ThreadDump{},
+		ThreadDump{},
+	}
 }
 
+func (self *Parser) Dump() (ThreadDump) {
+	return self.currentDump
+}
+
+// FIXME: simplify this whole bunch of code
 func (self *Parser) NextThread() (Thread, bool, error) {
 	thread := Thread{}
 	// Check if a header line was cached on the last Next() call and parse it now.
@@ -24,15 +36,28 @@ func (self *Parser) NextThread() (Thread, bool, error) {
 		parseThreadHeader(&thread, self.lastLine)
 		self.lastLine = ""
 	}
+	// Adopt an already reached next dump.
+	if self.nextDump.id != "" {
+		self.currentDump = self.nextDump
+		self.nextDump = ThreadDump{}
+	}
+
+	prevLine := ""
+	dumpSwitched := false
 
 	for self.scanner.Scan() {
 		line := self.scanner.Text()
 		if isThreadHeader(line) {
+			// We found a thread but have not reached a dump yet. Start an anonymous dump then.
+			if self.currentDump.id == "" {
+				self.currentDump = generateDump(self.currentDump)
+				dumpSwitched = true
+			}
 			// A new dump started without forewarning (no new line between the dumps). We have to remember/cache
 			// this line in case Next() is called again. Otherwise we would forget this new dump.
 			if thread.name != "" {
 				self.lastLine = line
-				return thread, true, nil
+				return thread, dumpSwitched, nil
 			} else {
 				parseThreadHeader(&thread, line)
 			}
@@ -40,12 +65,32 @@ func (self *Parser) NextThread() (Thread, bool, error) {
 			parseCodeLine(&thread, line)
 		} else if isLock(line) {
 			parseLockLine(&thread, line)
-		} else if isThreadEnd(line) {
-			return thread, thread.name != "", nil
+		} else if isThreadEnd(line) && thread.name != "" {
+			return thread, dumpSwitched, nil
+		} else if isDumpStart(line) {
+			dump := parseDumpHeader(line, prevLine)
+			// It may happen that we are already parsing a thread and happen to reach a new dump. In this case we
+			// remember the dump and set it as current dump in the next call of Next().
+			if thread.name != "" {
+				self.nextDump = dump
+			} else {
+				self.currentDump = dump
+				dumpSwitched = true
+			}
+
+			if thread.name != "" {
+				return thread, dumpSwitched, nil
+			}
+		} else {
+			prevLine = line
 		}
 	}
 
-	return thread, thread.name != "", io.EOF
+	if thread.name == "" {
+		return thread, false, io.EOF
+	} else {
+		return thread, dumpSwitched, nil		
+	}
 }
 
 func isThreadHeader(line string) bool {
@@ -57,7 +102,7 @@ func isCodeLine(line string) bool {
 }
 
 func isThreadEnd(line string) bool {
-	return line == "\n"
+	return line == ""
 }
 
 func isLock(line string) bool {
@@ -66,6 +111,13 @@ func isLock(line string) bool {
 
 func isDumpStart(line string) bool {
 	return strings.HasPrefix(line, "Full thread dump")
+}
+
+func generateDump(lastDump ThreadDump) ThreadDump {
+	return ThreadDump {
+		"",
+		"0",
+	}
 }
 
 func parseThreadHeader(thread *Thread, line string) {
