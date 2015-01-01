@@ -5,8 +5,16 @@ package tdformat
 */
 
 const (
+	THREAD_UNKNOWN = -1
+
 	THREAD_RUNNING = 0
-	// TODO: all the other states
+	// Object.wait()
+	THREAD_WAITING = 1
+	// Object.wait(long) (with timeout)
+	THREAD_TIMED_WAITING = 2
+	THREAD_PARKED = 3
+	// Waiting at a synchronized block
+	THREAD_BLOCKED = 4
 )
 
 type ThreadDump struct {

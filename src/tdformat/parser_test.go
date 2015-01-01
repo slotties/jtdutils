@@ -175,3 +175,35 @@ func TestLocks(t *testing.T) {
 	assert.True(t, lock.Holds)
 	assert.Equal(t, "0x00000000c0092b98", lock.Address)
 }
+
+func TestThreadStates(t *testing.T) {
+	reader := strings.NewReader(`
+"AWT-Windows" daemon prio=6 tid=0x0000000007e88800 nid=0x17a4 runnable [0x0000000009bef000]
+   java.lang.Thread.State: RUNNABLE
+"AWT-Shutdown" prio=6 tid=0x0000000007e31800 nid=0xb34 in Object.wait() [0x0000000009aef000]
+   java.lang.Thread.State: WAITING (on object monitor)
+"a" prio=1 tid=0x2 nid=0x3 waiting on condition [0x4]
+   java.lang.Thread.State: WAITING (parking)
+"Thread-2" prio=6 tid=0x00000000092e4000 nid=0x7fc in Object.wait() [0x000000000a70e000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+"My thread" prio=10 tid=0x00007fffec015800 nid=0x1775 waiting for monitor entry [0x00007ffff15e5000]
+   java.lang.Thread.State: BLOCKED (on object monitor)   
+`)
+	parser := NewParser(reader)
+	assert.NotNil(t, parser)
+
+	thread, _, _ := parser.NextThread()
+	assert.Equal(t, THREAD_RUNNING, thread.State)
+
+	thread, _, _ = parser.NextThread()
+	assert.Equal(t, THREAD_WAITING, thread.State)
+
+	thread, _, _ = parser.NextThread()
+	assert.Equal(t, THREAD_PARKED, thread.State)
+
+	thread, _, _ = parser.NextThread()
+	assert.Equal(t, THREAD_TIMED_WAITING, thread.State)
+
+	thread, _, _ = parser.NextThread()
+	assert.Equal(t, THREAD_BLOCKED, thread.State)
+}

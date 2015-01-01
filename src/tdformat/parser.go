@@ -65,6 +65,8 @@ func (self *Parser) NextThread() (Thread, bool, error) {
 			parseCodeLine(&thread, line)
 		} else if isLock(line) {
 			parseLockLine(&thread, line)
+		} else if isState(line) {
+			parseStateLine(&thread, line)
 		} else if isThreadEnd(line) && thread.Name != "" {
 			return thread, dumpSwitched, nil
 		} else if isDumpStart(line) {
@@ -110,6 +112,10 @@ func isDumpStart(line string) bool {
 	return strings.HasPrefix(line, "Full thread dump")
 }
 
+func isState(line string) bool {
+	return strings.HasPrefix(line, "   java.lang.Thread.State:")
+}
+
 func generateDump(lastDump ThreadDump) ThreadDump {
 	return ThreadDump {
 		"",
@@ -127,9 +133,7 @@ func parseThreadHeader(thread *Thread, line string) {
 	thread.Priority, _ = strconv.Atoi(stringBetween(line, "prio=", " "))
 	thread.Stacktrace = make([]CodeLine, 0)
 	thread.Locks = make([]Lock, 0)
-	thread.State = THREAD_RUNNING
-	// TODO: read state from main line or from the ThreadState line?
-	// TODO: state
+	thread.State = THREAD_UNKNOWN
 }
 
 func parseCodeLine(thread *Thread, line string) {
@@ -161,6 +165,20 @@ func parseLockLine(thread *Thread, line string) {
 	lock.Holds = strings.Contains(line, "locked <")
 	
 	thread.Locks = append(thread.Locks, lock)
+}
+
+func parseStateLine(thread *Thread, line string) {
+	if strings.Contains(line, "RUNNABLE") {
+		thread.State = THREAD_RUNNING
+	} else if strings.Contains(line, "TIMED_WAITING (on object monitor)") {
+		thread.State = THREAD_TIMED_WAITING
+	} else if strings.Contains(line, "WAITING (on object monitor)") {
+		thread.State = THREAD_WAITING
+	} else if strings.Contains(line, "WAITING (parking)") {
+		thread.State = THREAD_PARKED
+	} else if strings.Contains(line, "BLOCKED (on object monitor) ") {
+		thread.State = THREAD_BLOCKED
+	}
 }
 
 func parseDumpHeader(headerLine string, prevLine string) ThreadDump {
