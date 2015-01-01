@@ -1,8 +1,11 @@
-package tdstats
+package main
 
 import (
 	"fmt"
 	"tdformat"
+	"flag"
+	"os"
+	"io"
 )
 
 type StateStats struct {
@@ -11,7 +14,43 @@ type StateStats struct {
 }
 
 func main() {
-	fmt.Printf("yo\n")
+	fileName := flag.String("f", "", "the file to use (stdin is used per default)")
+	flag.Parse()
+
+fmt.Printf("reading %v\n", *fileName)
+	reader, err := newReader(*fileName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Could not open file '%v': %v\n", *fileName, err)
+		os.Exit(1)
+	}
+	parser := tdformat.NewParser(reader)
+	stats := allStats(parser)
+	printStats(stats, os.Stdout)
+}
+
+func newReader(fileName string) (io.Reader, error) {
+	if fileName == "" {
+		return os.Stdin, nil
+	} else {
+		return  os.Open(fileName)
+	}
+}
+
+func printStats(allStats []StateStats, out io.Writer) {
+	fmt.Fprintf(out, `
+                                   |  RUN | WAIT | TIMED_WAIT | PARK | BLOCK
+-----------------------------------|------|------|------------|------|-------
+`)
+
+	for _, stats := range allStats {
+		fmt.Fprintf(out, "%-35v %5v  %5v        %5v  %5v   %5v\n", 
+			stats.dump.Id,
+			stats.stats[tdformat.THREAD_RUNNING],
+			stats.stats[tdformat.THREAD_WAITING],
+			stats.stats[tdformat.THREAD_TIMED_WAITING],
+			stats.stats[tdformat.THREAD_PARKED],
+			stats.stats[tdformat.THREAD_BLOCKED])
+	}
 }
 
 func allStats(parser tdformat.Parser) []StateStats {

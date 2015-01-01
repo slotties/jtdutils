@@ -1,4 +1,4 @@
-package tdstats
+package main
 
 import (
 	"testing"
