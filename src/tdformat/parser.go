@@ -176,7 +176,7 @@ func parseStateLine(thread *Thread, line string) {
 		thread.State = THREAD_WAITING
 	} else if strings.Contains(line, "WAITING (parking)") {
 		thread.State = THREAD_PARKED
-	} else if strings.Contains(line, "BLOCKED (on object monitor) ") {
+	} else if strings.Contains(line, "BLOCKED (on object monitor)") {
 		thread.State = THREAD_BLOCKED
 	}
 }
