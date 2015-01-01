@@ -4,33 +4,39 @@ package tdformat
 	Here are all structures regarding thread dump formats, such as dumps or stacktraces.
 */
 
+const (
+	THREAD_RUNNING = 0
+	// TODO: all the other states
+)
+
 type ThreadDump struct {
 	// TODO: time
-	infoLine string
-	id string
+	InfoLine string
+	Id string
 	// TODO: index?
 }
 
 type Thread struct {
-	name string
-	nid string
-	tid string
-	daemon bool
-	priority int
+	Name string
+	Nid string
+	Tid string
+	Daemon bool
+	Priority int
+	State int
 
-	stacktrace []CodeLine
-	locks []Lock
+	Stacktrace []CodeLine
+	Locks []Lock
 }
 
 type CodeLine struct {
-	methodName string
-	fileName string
-	lineNumber int
-	native bool
+	MethodName string
+	FileName string
+	LineNumber int
+	Native bool
 }
 
 type Lock struct {
-	className string
-	address string
-	holds bool
+	ClassName string
+	Address string
+	Holds bool
 }

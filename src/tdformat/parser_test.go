@@ -34,28 +34,28 @@ Full thread dump foo bar:
 	thread, reachedNewDump, err := parser.NextThread()
 	assert.True(t, reachedNewDump)
 	assert.Nil(t, err)
-	assert.Equal(t, "D3D Screen Updater", thread.name)
-	assert.Equal(t, "0", parser.Dump().id)
+	assert.Equal(t, "D3D Screen Updater", thread.Name)
+	assert.Equal(t, "0", parser.Dump().Id)
 	thread, reachedNewDump, err = parser.NextThread()
 	assert.False(t, reachedNewDump)
-	assert.Equal(t, "main1", thread.name)
-	assert.Equal(t, "0", parser.Dump().id)
+	assert.Equal(t, "main1", thread.Name)
+	assert.Equal(t, "0", parser.Dump().Id)
 
 	// Second dump
 	thread, reachedNewDump, err = parser.NextThread()
 	assert.True(t, reachedNewDump)
 	assert.Nil(t, err)
-	assert.Equal(t, "main2", thread.name)
-	assert.Equal(t, "2014-12-31 11:01:49", parser.Dump().id)
-	assert.Equal(t, "Java HotSpot(TM) 64-Bit Server VM (24.65-b04 mixed mode)", parser.Dump().infoLine)
+	assert.Equal(t, "main2", thread.Name)
+	assert.Equal(t, "2014-12-31 11:01:49", parser.Dump().Id)
+	assert.Equal(t, "Java HotSpot(TM) 64-Bit Server VM (24.65-b04 mixed mode)", parser.Dump().InfoLine)
 
 	// Third dump
 	thread, reachedNewDump, err = parser.NextThread()
 	assert.True(t, reachedNewDump)
 	assert.Nil(t, err)
-	assert.Equal(t, "foo", thread.name)
-	assert.Equal(t, "2015-06-24 10:12:45", parser.Dump().id)
-	assert.Equal(t, "foo bar", parser.Dump().infoLine)
+	assert.Equal(t, "foo", thread.Name)
+	assert.Equal(t, "2015-06-24 10:12:45", parser.Dump().Id)
+	assert.Equal(t, "foo bar", parser.Dump().InfoLine)
 }
 
 func TestNextThread_Single(t *testing.T) {
@@ -67,11 +67,11 @@ func TestNextThread_Single(t *testing.T) {
 	assert.NotNil(t, thread)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "D3D Screen Updater", thread.name)
-	assert.Equal(t, "0xe2c", thread.nid)
-	assert.Equal(t, "0x00000000094ce800", thread.tid)
-	assert.Equal(t, true, thread.daemon)
-	assert.Equal(t, 8, thread.priority)
+	assert.Equal(t, "D3D Screen Updater", thread.Name)
+	assert.Equal(t, "0xe2c", thread.Nid)
+	assert.Equal(t, "0x00000000094ce800", thread.Tid)
+	assert.Equal(t, true, thread.Daemon)
+	assert.Equal(t, 8, thread.Priority)
 
 	thread, _, err = parser.NextThread()
 	assert.NotNil(t, thread)
@@ -89,19 +89,19 @@ func TestNextThread_Multiple(t *testing.T) {
 	thread, _, err := parser.NextThread()
 	assert.NotNil(t, thread)
 	assert.Nil(t, err)
-	assert.Equal(t, "D3D Screen Updater", thread.name)
-	assert.Equal(t, "0xe2c", thread.nid)
-	assert.Equal(t, "0x00000000094ce800", thread.tid)
-	assert.Equal(t, true, thread.daemon)
-	assert.Equal(t, 8, thread.priority)
+	assert.Equal(t, "D3D Screen Updater", thread.Name)
+	assert.Equal(t, "0xe2c", thread.Nid)
+	assert.Equal(t, "0x00000000094ce800", thread.Tid)
+	assert.Equal(t, true, thread.Daemon)
+	assert.Equal(t, 8, thread.Priority)
 
 	thread, _, err = parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.Equal(t, "main", thread.name)
-	assert.Equal(t, "0xccc", thread.nid)
-	assert.Equal(t, "0x10000000094ce800", thread.tid)
-	assert.Equal(t, false, thread.daemon)
-	assert.Equal(t, 1, thread.priority)
+	assert.Equal(t, "main", thread.Name)
+	assert.Equal(t, "0xccc", thread.Nid)
+	assert.Equal(t, "0x10000000094ce800", thread.Tid)
+	assert.Equal(t, false, thread.Daemon)
+	assert.Equal(t, 1, thread.Priority)
 
 	thread, _, err = parser.NextThread()
 	assert.NotNil(t, thread)
@@ -124,26 +124,26 @@ func TestStacktrace(t *testing.T) {
 
 	thread, _, _ := parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.NotNil(t, thread.stacktrace)
-	assert.Equal(t, 3, len(thread.stacktrace))
+	assert.NotNil(t, thread.Stacktrace)
+	assert.Equal(t, 3, len(thread.Stacktrace))
 
-	line := thread.stacktrace[0]
-	assert.Equal(t, "java.lang.Object.wait", line.methodName)
-	assert.True(t, line.native)
-	assert.Equal(t, "", line.fileName)
-	assert.Equal(t, 0, line.lineNumber)
+	line := thread.Stacktrace[0]
+	assert.Equal(t, "java.lang.Object.wait", line.MethodName)
+	assert.True(t, line.Native)
+	assert.Equal(t, "", line.FileName)
+	assert.Equal(t, 0, line.LineNumber)
 
-	line = thread.stacktrace[1]
-	assert.Equal(t, "sun.java2d.d3d.D3DScreenUpdateManager.run", line.methodName)
-	assert.False(t, line.native)
-	assert.Equal(t, "D3DScreenUpdateManager.java", line.fileName)
-	assert.Equal(t, 432, line.lineNumber)
+	line = thread.Stacktrace[1]
+	assert.Equal(t, "sun.java2d.d3d.D3DScreenUpdateManager.run", line.MethodName)
+	assert.False(t, line.Native)
+	assert.Equal(t, "D3DScreenUpdateManager.java", line.FileName)
+	assert.Equal(t, 432, line.LineNumber)
 
-	line = thread.stacktrace[2]
-	assert.Equal(t, "java.lang.Thread.run", line.methodName)
-	assert.False(t, line.native)
-	assert.Equal(t, "Thread.java", line.fileName)
-	assert.Equal(t, 745, line.lineNumber)
+	line = thread.Stacktrace[2]
+	assert.Equal(t, "java.lang.Thread.run", line.MethodName)
+	assert.False(t, line.Native)
+	assert.Equal(t, "Thread.java", line.FileName)
+	assert.Equal(t, 745, line.LineNumber)
 }
 
 func TestLocks(t *testing.T) {
@@ -162,16 +162,16 @@ func TestLocks(t *testing.T) {
 
 	thread, _, _ := parser.NextThread()
 	assert.NotNil(t, thread)
-	assert.NotNil(t, thread.locks)
-	assert.Equal(t, 2, len(thread.locks))
+	assert.NotNil(t, thread.Locks)
+	assert.Equal(t, 2, len(thread.Locks))
 
-	lock := thread.locks[0]
-	assert.Equal(t, "java.lang.Object", lock.className)
-	assert.False(t, lock.holds)
-	assert.Equal(t, "0x00000000c0092b98", lock.address)
+	lock := thread.Locks[0]
+	assert.Equal(t, "java.lang.Object", lock.ClassName)
+	assert.False(t, lock.Holds)
+	assert.Equal(t, "0x00000000c0092b98", lock.Address)
 
-	lock = thread.locks[1]
-	assert.Equal(t, "a.b.C", lock.className)
-	assert.True(t, lock.holds)
-	assert.Equal(t, "0x00000000c0092b98", lock.address)
+	lock = thread.Locks[1]
+	assert.Equal(t, "a.b.C", lock.ClassName)
+	assert.True(t, lock.Holds)
+	assert.Equal(t, "0x00000000c0092b98", lock.Address)
 }

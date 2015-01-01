@@ -37,7 +37,7 @@ func (self *Parser) NextThread() (Thread, bool, error) {
 		self.lastLine = ""
 	}
 	// Adopt an already reached next dump.
-	if self.nextDump.id != "" {
+	if self.nextDump.Id != "" {
 		self.currentDump = self.nextDump
 		self.nextDump = ThreadDump{}
 	}
@@ -49,13 +49,13 @@ func (self *Parser) NextThread() (Thread, bool, error) {
 		line := self.scanner.Text()
 		if isThreadHeader(line) {
 			// We found a thread but have not reached a dump yet. Start an anonymous dump then.
-			if self.currentDump.id == "" {
+			if self.currentDump.Id == "" {
 				self.currentDump = generateDump(self.currentDump)
 				dumpSwitched = true
 			}
 			// A new dump started without forewarning (no new line between the dumps). We have to remember/cache
 			// this line in case Next() is called again. Otherwise we would forget this new dump.
-			if thread.name != "" {
+			if thread.Name != "" {
 				self.lastLine = line
 				return thread, dumpSwitched, nil
 			} else {
@@ -65,28 +65,25 @@ func (self *Parser) NextThread() (Thread, bool, error) {
 			parseCodeLine(&thread, line)
 		} else if isLock(line) {
 			parseLockLine(&thread, line)
-		} else if isThreadEnd(line) && thread.name != "" {
+		} else if isThreadEnd(line) && thread.Name != "" {
 			return thread, dumpSwitched, nil
 		} else if isDumpStart(line) {
 			dump := parseDumpHeader(line, prevLine)
 			// It may happen that we are already parsing a thread and happen to reach a new dump. In this case we
 			// remember the dump and set it as current dump in the next call of Next().
-			if thread.name != "" {
+			if thread.Name != "" {
 				self.nextDump = dump
+				return thread, dumpSwitched, nil
 			} else {
 				self.currentDump = dump
 				dumpSwitched = true
-			}
-
-			if thread.name != "" {
-				return thread, dumpSwitched, nil
 			}
 		} else {
 			prevLine = line
 		}
 	}
 
-	if thread.name == "" {
+	if thread.Name == "" {
 		return thread, false, io.EOF
 	} else {
 		return thread, dumpSwitched, nil		
@@ -123,13 +120,15 @@ func generateDump(lastDump ThreadDump) ThreadDump {
 func parseThreadHeader(thread *Thread, line string) {
 	// Example: "D3D Screen Updater" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
 
-	thread.name = stringBetween(line, "\"", "\"")
-	thread.nid = stringBetween(line, "nid=", " ")
-	thread.tid = stringBetween(line, "tid=", " ")
-	thread.daemon = strings.Contains(line, "daemon")
-	thread.priority, _ = strconv.Atoi(stringBetween(line, "prio=", " "))
-	thread.stacktrace = make([]CodeLine, 0)
-	thread.locks = make([]Lock, 0)
+	thread.Name = stringBetween(line, "\"", "\"")
+	thread.Nid = stringBetween(line, "nid=", " ")
+	thread.Tid = stringBetween(line, "tid=", " ")
+	thread.Daemon = strings.Contains(line, "daemon")
+	thread.Priority, _ = strconv.Atoi(stringBetween(line, "prio=", " "))
+	thread.Stacktrace = make([]CodeLine, 0)
+	thread.Locks = make([]Lock, 0)
+	thread.State = THREAD_RUNNING
+	// TODO: read state from main line or from the ThreadState line?
 	// TODO: state
 }
 
@@ -140,14 +139,14 @@ func parseCodeLine(thread *Thread, line string) {
 	*/
 	codeLine := CodeLine{}
 
-	codeLine.methodName = stringBetween(line, "at ", "(")
-	codeLine.native = strings.Contains(line, "Native Method")
-	if !codeLine.native {
-		codeLine.fileName = stringBetween(line, "(", ":")
-		codeLine.lineNumber, _ = strconv.Atoi(stringBetween(line, ":", ")"))
+	codeLine.MethodName = stringBetween(line, "at ", "(")
+	codeLine.Native = strings.Contains(line, "Native Method")
+	if !codeLine.Native {
+		codeLine.FileName = stringBetween(line, "(", ":")
+		codeLine.LineNumber, _ = strconv.Atoi(stringBetween(line, ":", ")"))
 	}
 
-	thread.stacktrace = append(thread.stacktrace, codeLine)
+	thread.Stacktrace = append(thread.Stacktrace, codeLine)
 }
 
 func parseLockLine(thread *Thread, line string) {
@@ -157,11 +156,11 @@ func parseLockLine(thread *Thread, line string) {
 	*/
 	lock := Lock{}
 
-	lock.className = stringBetween(line, "a ", ")")
-	lock.address = stringBetween(line, "<", ">")
-	lock.holds = strings.Contains(line, "locked <")
+	lock.ClassName = stringBetween(line, "a ", ")")
+	lock.Address = stringBetween(line, "<", ">")
+	lock.Holds = strings.Contains(line, "locked <")
 	
-	thread.locks = append(thread.locks, lock)
+	thread.Locks = append(thread.Locks, lock)
 }
 
 func parseDumpHeader(headerLine string, prevLine string) ThreadDump {
