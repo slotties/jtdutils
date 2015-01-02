@@ -17,6 +17,9 @@ type Parser struct {
 
 	currentThread Thread
 	lastError error
+
+	ParseStacktrace bool
+	ParseLocks bool
 }
 
 func NewParser(r io.Reader) Parser {
@@ -29,6 +32,8 @@ func NewParser(r io.Reader) Parser {
 		false,
 		Thread{},
 		nil,
+		true,
+		true,
 	}
 }
 
@@ -81,9 +86,9 @@ func (self *Parser) NextThread() (bool) {
 			} else {
 				parseThreadHeader(&self.currentThread, line)
 			}
-		} else if isCodeLine(line) {
+		} else if self.ParseStacktrace && isCodeLine(line) {
 			parseCodeLine(&self.currentThread, line)
-		} else if isLock(line) {
+		} else if self.ParseLocks && isLock(line) {
 			parseLockLine(&self.currentThread, line)
 		} else if isState(line) {
 			parseStateLine(&self.currentThread, line)

@@ -31,6 +31,8 @@ func main() {
 	defer reader.Close()
 
 	parser := tdformat.NewParser(reader)
+	parser.ParseStacktrace = false
+	parser.ParseLocks = false
 	stats := allStats(parser)
 	printStats(stats, os.Stdout)
 }
