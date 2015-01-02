@@ -15,25 +15,24 @@ type StateStats struct {
 
 func main() {
 	fileName := flag.String("f", "", "the file to use (stdin is used per default)")
+	showHelp := flag.Bool("h", false, "shows this help")
 	flag.Parse()
 
-fmt.Printf("reading %v\n", *fileName)
-	reader, err := newReader(*fileName)
+	if *showHelp {
+		flag.PrintDefaults()
+		os.Exit(0)
+	}
+
+	reader, err := tdformat.OpenFile(fileName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not open file '%v': %v\n", *fileName, err)
 		os.Exit(1)
 	}
+	defer reader.Close()
+
 	parser := tdformat.NewParser(reader)
 	stats := allStats(parser)
 	printStats(stats, os.Stdout)
-}
-
-func newReader(fileName string) (io.Reader, error) {
-	if fileName == "" {
-		return os.Stdin, nil
-	} else {
-		return  os.Open(fileName)
-	}
 }
 
 func printStats(allStats []StateStats, out io.Writer) {
