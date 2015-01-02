@@ -4,6 +4,7 @@ package tdformat
 	Here are all structures regarding thread dump formats, such as dumps or stacktraces.
 */
 
+// TODO: define type for states
 const (
 	THREAD_UNKNOWN = -1
 
