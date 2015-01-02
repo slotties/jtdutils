@@ -73,8 +73,8 @@ func TestNextThread_Single(t *testing.T) {
 	assert.Nil(t, parser.Err())
 
 	assert.Equal(t, "D3D Screen Updater", thread.Name)
-	assert.Equal(t, "0xe2c", thread.Nid)
-	assert.Equal(t, "0x00000000094ce800", thread.Tid)
+	assert.Equal(t, 3628, thread.Pid)
+	assert.Equal(t, 156035072, thread.JavaPid)
 	assert.Equal(t, true, thread.Daemon)
 	assert.Equal(t, 8, thread.Priority)
 
@@ -86,7 +86,7 @@ func TestNextThread_Single(t *testing.T) {
 func TestNextThread_Multiple(t *testing.T) {
 	reader := strings.NewReader(`
 "D3D Screen Updater" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
-"main" prio=1 tid=0x10000000094ce800 nid=0xccc in Object.wait() [0x000000000ce3e000]
+"main" prio=1 tid=0x00000000094cf9c0 nid=0xccc in Object.wait() [0x000000000ce3e000]
 `)
 	parser := NewParser(reader)
 	assert.NotNil(t, parser)
@@ -96,8 +96,8 @@ func TestNextThread_Multiple(t *testing.T) {
 	assert.NotNil(t, thread)
 	assert.Nil(t, parser.Err())
 	assert.Equal(t, "D3D Screen Updater", thread.Name)
-	assert.Equal(t, "0xe2c", thread.Nid)
-	assert.Equal(t, "0x00000000094ce800", thread.Tid)
+	assert.Equal(t, 3628, thread.Pid)
+	assert.Equal(t, 156035072, thread.JavaPid)
 	assert.Equal(t, true, thread.Daemon)
 	assert.Equal(t, 8, thread.Priority)
 
@@ -105,8 +105,8 @@ func TestNextThread_Multiple(t *testing.T) {
 	thread = parser.Thread()
 	assert.NotNil(t, thread)
 	assert.Equal(t, "main", thread.Name)
-	assert.Equal(t, "0xccc", thread.Nid)
-	assert.Equal(t, "0x10000000094ce800", thread.Tid)
+	assert.Equal(t, 3276, thread.Pid)
+	assert.Equal(t, 156039616, thread.JavaPid)
 	assert.Equal(t, false, thread.Daemon)
 	assert.Equal(t, 1, thread.Priority)
 

@@ -32,10 +32,10 @@ Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.65-b04 mixed mode):
 
 	listThreads(parser, &out)
 	assert.Equal(t, `
-AWT-Windows                         B 0x17a4 0x0000000007e88800
-AWT-Shutdown                        W 0xb34  0x0000000007e31800
-a                                   P 0x3    0x2               
-zZ                                  R 0x17a4 0x0000000007e88800
-ZZ                                  T 0x7fc  0x00000000092e4000
+AWT-Windows                         B   6052
+AWT-Shutdown                        W   2868
+a                                   P      3
+zZ                                  R   6052
+ZZ                                  T   2044
 `, "\n" + out.String())
 }

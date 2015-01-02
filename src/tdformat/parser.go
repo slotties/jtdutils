@@ -153,8 +153,8 @@ func parseThreadHeader(thread *Thread, line string) {
 	// Example: "D3D Screen Updater" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
 
 	thread.Name = stringBetween(line, "\"", "\"")
-	thread.Nid = stringBetween(line, "nid=", " ")
-	thread.Tid = stringBetween(line, "tid=", " ")
+	thread.Pid, _ = strconv.ParseInt(stringBetween(line, "nid=0x", " "), 16, 64)
+	thread.JavaPid, _ = strconv.ParseInt(stringBetween(line, "tid=0x", " "), 16, 64)
 	thread.Daemon = strings.Contains(line, "daemon")
 	thread.Priority, _ = strconv.Atoi(stringBetween(line, "prio=", " "))
 	thread.Stacktrace = make([]CodeLine, 0)

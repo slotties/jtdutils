@@ -69,11 +69,10 @@ func listThreads(parser tdformat.Parser, out io.Writer) {
 
 func printThreads(threads []tdformat.Thread, out io.Writer) {
 	for _, thread := range threads {
-		fmt.Fprintf(out, "%-35v %v %-6v %-18v\n",
+		fmt.Fprintf(out, "%-35v %v %6v\n",
 			thread.Name,
 			convertState(thread.State),
-			thread.Nid,
-			thread.Tid)
+			thread.Pid)
 	}
 }
 

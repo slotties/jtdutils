@@ -27,8 +27,8 @@ type ThreadDump struct {
 
 type Thread struct {
 	Name string
-	Nid string
-	Tid string
+	Pid int64
+	JavaPid int64
 	Daemon bool
 	Priority int
 	State int
