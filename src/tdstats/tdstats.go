@@ -55,18 +55,13 @@ func printStats(allStats []StateStats, out io.Writer) {
 func allStats(parser tdformat.Parser) []StateStats {
 	stats := make([]StateStats, 0)
 	var currentStats StateStats
-	var thread tdformat.Thread
-	var switchedDump bool
-	var err error
 
-	for err == nil {
-		thread, switchedDump, err = parser.NextThread()
-		if switchedDump {
+	for parser.NextThread() {
+		if parser.SwitchedDump() {
 			currentStats = newStats(parser.Dump())
 			stats = append(stats, currentStats)
-		} else {
-			currentStats.stats[thread.State]++
 		}
+		currentStats.stats[parser.Thread().State]++
 	}
 
 	return stats
