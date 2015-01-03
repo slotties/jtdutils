@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"tdformat"
-	"flag"
 	"os"
 	"io"
+	"tdtool"
 )
 
 type StateStats struct {
@@ -14,23 +14,7 @@ type StateStats struct {
 }
 
 func main() {
-	fileName := flag.String("f", "", "the file to use (stdin is used per default)")
-	showHelp := flag.Bool("h", false, "shows this help")
-	flag.Parse()
-
-	if *showHelp {
-		flag.PrintDefaults()
-		os.Exit(0)
-	}
-
-	reader, err := tdformat.OpenFile(fileName)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not open file '%v': %v\n", *fileName, err)
-		os.Exit(1)
-	}
-	defer reader.Close()
-
-	parser := tdformat.NewParser(reader)
+	parser := tdtool.InitTool()
 	parser.ParseStacktrace = false
 	parser.ParseLocks = false
 	stats := allStats(parser)

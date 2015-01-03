@@ -7,6 +7,7 @@ import (
 	"os"
 	"io"
 	"sort"
+	"tdtool"
 )
 
 type StateStats struct {
@@ -23,28 +24,13 @@ type Conf struct {
 }
 
 func main() {
-	fileName := flag.String("f", "", "the file to use (stdin is used per default)")
-	showHelp := flag.Bool("h", false, "shows this help")
 	sortBy := flag.String("s", "", "sort by any of: name, pid, state or empty (natural order)")
 	reverseOrder := flag.Bool("r", false, "reverse sort order")
 	printHexPids := flag.Bool("hex", false, "print PIDs in hexadecimal instead of decimal")
 
-	flag.Parse()
-
-	if *showHelp {
-		flag.PrintDefaults()
-		os.Exit(0)
-	}
-
-	reader, err := tdformat.OpenFile(fileName)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not open file '%v': %v\n", *fileName, err)
-		os.Exit(1)
-	}
-	defer reader.Close()
-
-	parser := tdformat.NewParser(reader)
+	parser := tdtool.InitTool()
 	parser.ParseStacktrace = false
+	parser.ParseLocks = false
 	
 	conf := Conf{}
 	conf.sortBy = *sortBy
