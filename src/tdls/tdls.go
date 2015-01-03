@@ -6,6 +6,7 @@ import (
 	"flag"
 	"os"
 	"io"
+	"sort"
 )
 
 type StateStats struct {
@@ -13,18 +14,21 @@ type StateStats struct {
 	stats map[int]int
 }
 
+type PrintPidFunc func(thread tdformat.Thread, out io.Writer)
+
+type Conf struct {
+	sortBy string
+	reverseOrder bool
+	printPid PrintPidFunc
+}
+
 func main() {
 	fileName := flag.String("f", "", "the file to use (stdin is used per default)")
 	showHelp := flag.Bool("h", false, "shows this help")
-	/* TODO:
-		support for --hex (print hex tids/nids instead of decimal ones)
-		support for -r (reverse sort order)
-		support for -P (sort by native PID)
-		support for -J (sort by java PID)
-		support for -N (sort by name)
-		support for -S (sort by state)
-		support for -1 (just thread names, one per line)
-	 */
+	sortBy := flag.String("s", "", "sort by any of: name, pid, state or empty (natural order)")
+	reverseOrder := flag.Bool("r", false, "reverse sort order")
+	printHexPids := flag.Bool("hex", false, "print PIDs in hexadecimal instead of decimal")
+
 	flag.Parse()
 
 	if *showHelp {
@@ -42,18 +46,26 @@ func main() {
 	parser := tdformat.NewParser(reader)
 	parser.ParseStacktrace = false
 	
-	listThreads(parser, os.Stdout)
+	conf := Conf{}
+	conf.sortBy = *sortBy
+	conf.reverseOrder = *reverseOrder
+	if *printHexPids {
+		conf.printPid = printHexPid
+	} else {
+		conf.printPid = printDecimalPid
+	}
+
+	listThreads(parser, conf, os.Stdout)
 }
 
-func listThreads(parser tdformat.Parser, out io.Writer) {
+func listThreads(parser tdformat.Parser, conf Conf, out io.Writer) {
 	// TODO: print header
 	var threads []tdformat.Thread
+	sorter := NewSortableThreads(nil, conf.sortBy, conf.reverseOrder)
 
 	for parser.NextThread() {
-		if parser.SwitchedDump() && len(threads) > 0 {
-			// TODO: sort threads
-			printThreads(threads, out)
-
+		if parser.SwitchedDump() {
+			printThreads(threads[0:], &sorter, conf, out)
 			threads = make([]tdformat.Thread, 0)
 		}
 
@@ -61,19 +73,33 @@ func listThreads(parser tdformat.Parser, out io.Writer) {
 	}
 
 	// Flush the recorded list of threads
-	if len(threads) > 0 {
-		// TODO: sort threads
-		printThreads(threads, out)
+	//sorter = NewSortableThreads(threads, sortBy, reverseOrder)
+	printThreads(threads[0:], &sorter, conf, out)
+}
+
+func printThreads(threads []tdformat.Thread, sorter *SortableThreads, conf Conf, out io.Writer) {
+	if len(threads) < 1 {
+		return
+	}
+
+	sorter.ChangeThreads(threads)
+	sort.Sort(sorter)
+
+	for _, thread := range threads {
+		fmt.Fprintf(out, "%-35v %v ",
+			thread.Name,
+			convertState(thread.State))
+
+		conf.printPid(thread, out)
+		out.Write([]byte("\n"))
 	}
 }
 
-func printThreads(threads []tdformat.Thread, out io.Writer) {
-	for _, thread := range threads {
-		fmt.Fprintf(out, "%-35v %v %6v\n",
-			thread.Name,
-			convertState(thread.State),
-			thread.Pid)
-	}
+func printDecimalPid(thread tdformat.Thread, out io.Writer) {
+	fmt.Fprintf(out, "%6v", thread.Pid)
+}
+func printHexPid(thread tdformat.Thread, out io.Writer) {
+	fmt.Fprintf(out, "0x%-4x", thread.Pid)
 }
 
 func convertState(state int) (string) {
@@ -92,3 +118,4 @@ func convertState(state int) (string) {
 			return "U"
 	}
 }
+
