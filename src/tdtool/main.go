@@ -19,11 +19,11 @@ func InitTool() tdformat.Parser {
 	}
 
 	reader, err := tdformat.OpenFile(fileName)
+	// FIXME: the reader has to be closed somehow
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not open file '%v': %v\n", *fileName, err)
 		os.Exit(1)
 	}
-	defer reader.Close()
 
 	return tdformat.NewParser(reader)
 }
