@@ -82,10 +82,6 @@ Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.65-b04 mixed mode):
 "holder1" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
    java.lang.Thread.State: TIMED_WAITING (on object monitor)
 	- locked <0x456> (a a.b.C)
-
-"holder2" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
-   java.lang.Thread.State: TIMED_WAITING (on object monitor)
-	- locked <0x789> (a a.b.C)
 `)
 	
 	parser := tdformat.NewParser(reader)
@@ -97,8 +93,6 @@ Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.65-b04 mixed mode):
 	assert.Equal(t, `
 Dump: 2014-12-31 11:01:49
 "holder1" holds 0x456 (a.b.C)
-
-"holder2" holds 0x789 (a.b.C)
 
 `, "\n" + out.String())
 }
