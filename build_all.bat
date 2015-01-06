@@ -1,2 +1,2 @@
-go test tdformat tdstats tdls
-go build tdstats tdls
+go test tdformat tdstats tdls tdlocks
+go build tdstats tdls tdlocks
