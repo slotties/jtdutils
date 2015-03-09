@@ -35,6 +35,8 @@ type Thread struct {
 
 	Stacktrace []CodeLine
 	Locks []Lock
+
+	TextContent string
 }
 
 type CodeLine struct {

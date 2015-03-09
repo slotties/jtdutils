@@ -20,6 +20,8 @@ type Parser struct {
 
 	ParseStacktrace bool
 	ParseLocks bool
+
+	KeepContent bool
 }
 
 func NewParser(r io.Reader) Parser {
@@ -34,6 +36,7 @@ func NewParser(r io.Reader) Parser {
 		nil,
 		true,
 		true,
+		false,
 	}
 }
 
@@ -85,13 +88,25 @@ func (self *Parser) NextThread() (bool) {
 				return true
 			} else {
 				parseThreadHeader(&self.currentThread, line)
+				if self.KeepContent {
+					self.currentThread.TextContent += line + "\n"
+				}
 			}
 		} else if self.ParseStacktrace && isCodeLine(line) {
 			parseCodeLine(&self.currentThread, line)
+			if self.KeepContent {
+				self.currentThread.TextContent += line + "\n"
+			}
 		} else if self.ParseLocks && isLock(line) {
 			parseLockLine(&self.currentThread, line)
+			if self.KeepContent {
+				self.currentThread.TextContent += line + "\n"
+			}
 		} else if isState(line) {
 			parseStateLine(&self.currentThread, line)
+			if self.KeepContent {
+				self.currentThread.TextContent += line + "\n"
+			}
 		} else if isThreadEnd(line) && self.currentThread.Name != "" {
 			return true
 		} else if isDumpStart(line) {

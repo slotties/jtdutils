@@ -314,3 +314,49 @@ func TestSkipLocks(t *testing.T) {
 	assert.Equal(t, 0, len(thread.Locks))
 	assert.Equal(t, "My thread", thread.Name)
 }
+
+func TestKeepContent(t *testing.T) {
+	reader := strings.NewReader(`
+"D3D Screen Updater" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait(Native Method)
+	- waiting on <0x00000000c0092b98> (a foo.bar)
+	at sun.java2d.d3d.D3DScreenUpdateManager.run(D3DScreenUpdateManager.java:432)
+	at java.lang.Thread.run(Thread.java:745)
+
+"Thread-2" prio=6 tid=0x00000000092e4000 nid=0x7fc in Object.wait() [0x000000000a70e000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait(Native Method)
+	at sun.java2d.d3d.D3DScreenUpdateManager.run(D3DScreenUpdateManager.java:432)
+	- locked <0x00000000c0092b98> (a java.lang.Object)
+	at java.lang.Thread.run(Thread.java:745)
+`)
+	parser := NewParser(reader)
+	assert.NotNil(t, parser)
+
+	parser.KeepContent = true
+
+	assert.True(t, parser.NextThread())
+	thread := parser.Thread()
+	assert.NotNil(t, thread)
+	assert.Equal(t, `
+"D3D Screen Updater" daemon prio=8 tid=0x00000000094ce800 nid=0xe2c in Object.wait() [0x000000000ce3e000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait(Native Method)
+	- waiting on <0x00000000c0092b98> (a foo.bar)
+	at sun.java2d.d3d.D3DScreenUpdateManager.run(D3DScreenUpdateManager.java:432)
+	at java.lang.Thread.run(Thread.java:745)
+`, "\n" + thread.TextContent)
+
+	assert.True(t, parser.NextThread())
+	thread = parser.Thread()
+	assert.NotNil(t, thread)
+	assert.Equal(t, `
+"Thread-2" prio=6 tid=0x00000000092e4000 nid=0x7fc in Object.wait() [0x000000000a70e000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait(Native Method)
+	at sun.java2d.d3d.D3DScreenUpdateManager.run(D3DScreenUpdateManager.java:432)
+	- locked <0x00000000c0092b98> (a java.lang.Object)
+	at java.lang.Thread.run(Thread.java:745)
+`, "\n" + thread.TextContent)
+}

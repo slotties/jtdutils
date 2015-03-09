@@ -9,11 +9,11 @@ import (
 
 func TestSortByName(t *testing.T) {
 	threads := []tdformat.Thread {		
-		tdformat.Thread{ "c", 0, 0, true, 0, 0, nil, nil, },
-		tdformat.Thread{ "a", 0, 0, true, 0, 0, nil, nil, },
-		tdformat.Thread{ "z", 0, 0, true, 0, 0, nil, nil, },
-		tdformat.Thread{ "Z", 0, 0, true, 0, 0, nil, nil, },
-		tdformat.Thread{ "A", 0, 0, true, 0, 0, nil, nil, },
+		tdformat.Thread{ "c", 0, 0, true, 0, 0, nil, nil, "", },
+		tdformat.Thread{ "a", 0, 0, true, 0, 0, nil, nil, "", },
+		tdformat.Thread{ "z", 0, 0, true, 0, 0, nil, nil, "", },
+		tdformat.Thread{ "Z", 0, 0, true, 0, 0, nil, nil, "", },
+		tdformat.Thread{ "A", 0, 0, true, 0, 0, nil, nil, "", },
 	}
 
 	sort.Sort(NewSortableThreads(threads, "name", false ))
@@ -33,11 +33,11 @@ func TestSortByName(t *testing.T) {
 
 func TestSortByPid(t *testing.T) {
 	threads := []tdformat.Thread {		
-		tdformat.Thread{ "c", 1, 0, true, 0, 0, nil, nil, },
-		tdformat.Thread{ "a", 3, 0, true, 0, 0, nil, nil, },
-		tdformat.Thread{ "z", 2, 0, true, 0, 0, nil, nil, },
-		tdformat.Thread{ "Z", 4, 0, true, 0, 0, nil, nil, },
-		tdformat.Thread{ "A", 5, 0, true, 0, 0, nil, nil, },
+		tdformat.Thread{ "c", 1, 0, true, 0, 0, nil, nil, "", },
+		tdformat.Thread{ "a", 3, 0, true, 0, 0, nil, nil, "", },
+		tdformat.Thread{ "z", 2, 0, true, 0, 0, nil, nil, "", },
+		tdformat.Thread{ "Z", 4, 0, true, 0, 0, nil, nil, "", },
+		tdformat.Thread{ "A", 5, 0, true, 0, 0, nil, nil, "", },
 	}
 
 	sort.Sort(NewSortableThreads(threads, "pid", false ))
@@ -57,12 +57,12 @@ func TestSortByPid(t *testing.T) {
 
 func TestSortByState(t *testing.T) {
 	threads := []tdformat.Thread {		
-		tdformat.Thread{ "c", 0, 0, true, 0, tdformat.THREAD_RUNNING, nil, nil, },
-		tdformat.Thread{ "a", 0, 0, true, 0, tdformat.THREAD_TIMED_WAITING, nil, nil, },
-		tdformat.Thread{ "z", 0, 0, true, 0, tdformat.THREAD_BLOCKED, nil, nil, },
-		tdformat.Thread{ "Z", 0, 0, true, 0, tdformat.THREAD_WAITING, nil, nil, },
-		tdformat.Thread{ "A", 0, 0, true, 0, tdformat.THREAD_PARKED, nil, nil, },
-		tdformat.Thread{ "A", 0, 0, true, 0, tdformat.THREAD_UNKNOWN, nil, nil, },
+		tdformat.Thread{ "c", 0, 0, true, 0, tdformat.THREAD_RUNNING, nil, nil, "", },
+		tdformat.Thread{ "a", 0, 0, true, 0, tdformat.THREAD_TIMED_WAITING, nil, nil, "", },
+		tdformat.Thread{ "z", 0, 0, true, 0, tdformat.THREAD_BLOCKED, nil, nil, "", },
+		tdformat.Thread{ "Z", 0, 0, true, 0, tdformat.THREAD_WAITING, nil, nil, "", },
+		tdformat.Thread{ "A", 0, 0, true, 0, tdformat.THREAD_PARKED, nil, nil, "", },
+		tdformat.Thread{ "A", 0, 0, true, 0, tdformat.THREAD_UNKNOWN, nil, nil, "", },
 	}
 
 	sort.Sort(NewSortableThreads(threads, "state", false ))
