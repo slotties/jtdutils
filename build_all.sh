@@ -1,4 +1,15 @@
 #!/bin/bash
 
-go test tdformat tdstats tdls tdlocks
-go build tdstats tdls tdlocks
+TOOLS="tdstats tdls tdlocks tdgrep"
+
+echo "Running tests ..."
+go test tdformat $TOOLS
+if [ "$?" != "0" ]; then
+	echo "Tests failed."
+	exit 1
+fi
+
+for tool in $TOOLS; do
+	echo "Building $tool ..."
+	go build -o bin/$tool $tool
+done
