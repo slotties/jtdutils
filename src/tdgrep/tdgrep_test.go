@@ -7,7 +7,7 @@ import (
 )
 
 func TestIsMatching_Name_Exact(t *testing.T) {
-	exactMatch, _ := createFilters("foo")
+	exactMatch, _ := createFilters("foo", "")
 
 	fooThread := tdformat.Thread{}
 	fooThread.Name = "foo"
@@ -19,7 +19,7 @@ func TestIsMatching_Name_Exact(t *testing.T) {
 }
 
 func TestIsMatching_Name_Wildcard(t *testing.T) {
-	exactMatch, _ := createFilters("foo.*")
+	exactMatch, _ := createFilters("foo.*", "")
 
 	fooThread := tdformat.Thread{}
 	fooThread.Name = "foo"
@@ -31,5 +31,17 @@ func TestIsMatching_Name_Wildcard(t *testing.T) {
 	assert.True(t, isMatching(&fooThread, &exactMatch))
 	assert.True(t, isMatching(&foo2Thread, &exactMatch))
 	assert.False(t, isMatching(&barThread, &exactMatch))
+}
+
+func TestIsMatching_Stacktrace(t *testing.T) {
+	methodMatchingFilter, _ := createFilters("", "myMethod")
+	nonmatchingFilter, _ := createFilters("", "foo")
+	fooThread := tdformat.Thread{}
+	fooThread.Stacktrace = []tdformat.CodeLine {
+		tdformat.CodeLine{"myMethod", "someFile", 1337, false, },
+	}
+
+	assert.True(t, isMatching(&fooThread, &methodMatchingFilter))
+	assert.False(t, isMatching(&fooThread, &nonmatchingFilter))
 }
 
